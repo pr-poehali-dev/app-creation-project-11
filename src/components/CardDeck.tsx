@@ -96,29 +96,19 @@ const CardDeck = ({
 
   const swipeProgress = Math.min(Math.abs(dragX) / 300, 1);
 
-  const nextScale = 0.94 + swipeProgress * 0.06;
-  const nextTranslateY = 14 - swipeProgress * 14;
-  const nextRotate = -2 + swipeProgress * 2;
-  const nextOpacity = 0.88 + swipeProgress * 0.12;
-
-  const thirdScale = 0.88 + swipeProgress * 0.06;
-  const thirdTranslateY = 26 - swipeProgress * 12;
-  const thirdRotate = 3 - swipeProgress * 1;
-  const thirdOpacity = 0.7 + swipeProgress * 0.18;
-
-  const smoothTransition = isDragging ? "none" : "transform 280ms ease-out, opacity 280ms ease-out";
+  const smoothTransition = isDragging || noTransition
+    ? "none"
+    : "transform 280ms ease-out, opacity 280ms ease-out, box-shadow 280ms ease-out";
 
   return (
-    <div className="relative flex items-center justify-center w-full" style={{ height: 580 }}>
+    <div className="relative flex items-center justify-center w-full" style={{ height: 600 }}>
       <div
         key={"slot-2-" + thirdCard.id}
-        className="absolute rounded-[28px] w-[350px] overflow-hidden pointer-events-none card-texture"
+        className="absolute pointer-events-none"
         style={{
-          height: 540,
-          transform: `scale(${thirdScale}) translateY(${thirdTranslateY}px) rotate(${thirdRotate}deg)`,
+          transform: `translateX(${8 - swipeProgress * 4}px) translateY(${16 - swipeProgress * 8}px) rotate(${3 - swipeProgress * 1}deg)`,
           zIndex: 8,
-          opacity: thirdOpacity,
-          boxShadow: "0 2px 4px rgba(0,0,0,0.04), 0 8px 20px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.3)",
+          opacity: 0.75 + swipeProgress * 0.13,
           transition: smoothTransition,
         }}
       >
@@ -133,13 +123,11 @@ const CardDeck = ({
 
       <div
         key={"slot-1-" + nextCard.id}
-        className="absolute rounded-[28px] w-[350px] overflow-hidden pointer-events-none card-texture"
+        className="absolute pointer-events-none"
         style={{
-          height: 540,
-          transform: `scale(${nextScale}) translateY(${nextTranslateY}px) rotate(${nextRotate}deg)`,
+          transform: `translateX(${4 - swipeProgress * 4}px) translateY(${8 - swipeProgress * 8}px) rotate(${-1.5 + swipeProgress * 1.5}deg)`,
           zIndex: 9,
-          opacity: nextOpacity,
-          boxShadow: "0 2px 4px rgba(0,0,0,0.05), 0 12px 24px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.35)",
+          opacity: 0.88 + swipeProgress * 0.12,
           transition: smoothTransition,
         }}
       >
