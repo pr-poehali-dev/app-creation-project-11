@@ -88,31 +88,60 @@ const CardDeck = ({
   const rotation = dragX * 0.05;
   const currentCard = cards[currentIndex];
 
+  const swipeProgress = Math.min(Math.abs(dragX) / 400, 1);
+  const nextScale = 0.92 + swipeProgress * 0.08;
+  const nextTranslateY = 16 - swipeProgress * 16;
+  const thirdScale = 0.86 + swipeProgress * 0.04;
+  const thirdTranslateY = 28 - swipeProgress * 12;
+
+  const nextIdx = (currentIndex + 1) % cards.length;
+  const thirdIdx = (currentIndex + 2) % cards.length;
+  const nextCard = cards[nextIdx];
+  const thirdCard = cards[thirdIdx];
+
   return (
     <div className="relative flex items-center justify-center w-full" style={{ height: 580 }}>
-      {[2, 1].map((offset) => {
-        const idx = (currentIndex + offset) % cards.length;
-        const bgCard = cards[idx];
-        const scale = 1 - offset * 0.04;
-        const translateY = offset * 12;
-        const rotateZ = offset * (offset === 2 ? 4 : -2);
+      <div
+        key={thirdCard.id + "-bg-2"}
+        className="absolute rounded-[28px] w-[350px] overflow-hidden"
+        style={{
+          height: 540,
+          transform: `scale(${thirdScale}) translateY(${thirdTranslateY}px) rotate(3deg)`,
+          zIndex: 8,
+          opacity: 0.7,
+          boxShadow: "0 4px 12px rgba(0,0,0,0.04)",
+          transition: isDragging ? "none" : "transform 250ms ease-out, opacity 250ms ease-out",
+        }}
+      >
+        <PerceptionCard
+          card={thirdCard}
+          confirmations={confirmations[thirdCard.id] || 0}
+          onConfirm={() => {}}
+          onShowExplanation={() => {}}
+          onLearnMore={() => {}}
+        />
+      </div>
 
-        return (
-          <div
-            key={bgCard.id + "-bg-" + offset}
-            className="absolute rounded-[28px] w-[350px]"
-            style={{
-              backgroundColor: bgCard.color,
-              height: 540,
-              transform: `scale(${scale}) translateY(${translateY}px) rotate(${rotateZ}deg)`,
-              zIndex: 10 - offset,
-              opacity: 1 - offset * 0.15,
-              boxShadow: "0 8px 20px rgba(0,0,0,0.05)",
-              transition: "transform 250ms ease-out, opacity 250ms ease-out",
-            }}
-          />
-        );
-      })}
+      <div
+        key={nextCard.id + "-bg-1"}
+        className="absolute rounded-[28px] w-[350px] overflow-hidden"
+        style={{
+          height: 540,
+          transform: `scale(${nextScale}) translateY(${nextTranslateY}px) rotate(-1.5deg)`,
+          zIndex: 9,
+          opacity: 0.85 + swipeProgress * 0.15,
+          boxShadow: "0 6px 16px rgba(0,0,0,0.06)",
+          transition: isDragging ? "none" : "transform 250ms ease-out, opacity 250ms ease-out",
+        }}
+      >
+        <PerceptionCard
+          card={nextCard}
+          confirmations={confirmations[nextCard.id] || 0}
+          onConfirm={() => {}}
+          onShowExplanation={() => {}}
+          onLearnMore={() => {}}
+        />
+      </div>
 
       <div
         className="relative z-20 touch-pan-y"
