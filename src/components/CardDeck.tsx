@@ -23,6 +23,7 @@ const CardDeck = ({
   const [dragX, setDragX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [noTransition, setNoTransition] = useState(false);
   const startX = useRef(0);
   const startY = useRef(0);
   const isHorizontal = useRef<boolean | null>(null);
@@ -69,9 +70,15 @@ const CardDeck = ({
       setDragX(direction * 500);
 
       setTimeout(() => {
+        setNoTransition(true);
         setDragX(0);
         setCurrentIndex((prev) => (prev + 1) % cards.length);
         setIsAnimating(false);
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            setNoTransition(false);
+          });
+        });
       }, 280);
     } else {
       setDragX(0);
@@ -149,7 +156,7 @@ const CardDeck = ({
         className="relative z-20 touch-pan-y"
         style={{
           transform: `translateX(${dragX}px) rotate(${rotation}deg)`,
-          transition: isDragging ? "none" : "transform 280ms ease-out",
+          transition: isDragging || noTransition ? "none" : "transform 280ms ease-out",
           cursor: "grab",
         }}
         onTouchStart={(e) => handleStart(e.touches[0].clientX, e.touches[0].clientY)}
