@@ -112,13 +112,13 @@ const CardDeck = ({
     <div className="relative flex items-center justify-center w-full" style={{ height: 580 }}>
       <div
         key={"slot-2-" + thirdCard.id}
-        className="absolute rounded-[28px] w-[350px] overflow-hidden pointer-events-none"
+        className="absolute rounded-[28px] w-[350px] overflow-hidden pointer-events-none card-texture"
         style={{
           height: 540,
           transform: `scale(${thirdScale}) translateY(${thirdTranslateY}px) rotate(${thirdRotate}deg)`,
           zIndex: 8,
           opacity: thirdOpacity,
-          boxShadow: "0 4px 12px rgba(0,0,0,0.04)",
+          boxShadow: "0 2px 4px rgba(0,0,0,0.04), 0 8px 20px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.3)",
           transition: smoothTransition,
         }}
       >
@@ -133,13 +133,13 @@ const CardDeck = ({
 
       <div
         key={"slot-1-" + nextCard.id}
-        className="absolute rounded-[28px] w-[350px] overflow-hidden pointer-events-none"
+        className="absolute rounded-[28px] w-[350px] overflow-hidden pointer-events-none card-texture"
         style={{
           height: 540,
           transform: `scale(${nextScale}) translateY(${nextTranslateY}px) rotate(${nextRotate}deg)`,
           zIndex: 9,
           opacity: nextOpacity,
-          boxShadow: "0 8px 20px rgba(0,0,0,0.06)",
+          boxShadow: "0 2px 4px rgba(0,0,0,0.05), 0 12px 24px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.35)",
           transition: smoothTransition,
         }}
       >
