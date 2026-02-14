@@ -12,36 +12,51 @@ interface CardDeckProps {
 
 const SWIPE_THRESHOLD = 80;
 
+let audioCtx: AudioContext | null = null;
+let noiseBuffer: AudioBuffer | null = null;
+
+const getAudioCtx = (): AudioContext | null => {
+  if (!audioCtx) {
+    const AC = window.AudioContext || (window as never)["webkitAudioContext"];
+    if (!AC) return null;
+    audioCtx = new AC();
+  }
+  if (audioCtx.state === "suspended") {
+    audioCtx.resume();
+  }
+  if (!noiseBuffer && audioCtx) {
+    const size = audioCtx.sampleRate * 0.12;
+    noiseBuffer = audioCtx.createBuffer(1, size, audioCtx.sampleRate);
+    const data = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < size; i++) {
+      const t = i / size;
+      data[i] = (Math.random() * 2 - 1) * (1 - t * t);
+    }
+  }
+  return audioCtx;
+};
+
 const playSwipeSound = () => {
   try {
-    const ctx = new (window.AudioContext || (window as never)["webkitAudioContext"])();
-    const gainNode = ctx.createGain();
-    gainNode.gain.setValueAtTime(0.12, ctx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
-    gainNode.connect(ctx.destination);
+    const ctx = getAudioCtx();
+    if (!ctx || !noiseBuffer) return;
 
-    const bufferSize = ctx.sampleRate * 0.15;
-    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) {
-      const t = i / bufferSize;
-      data[i] = (Math.random() * 2 - 1) * (1 - t) * (1 - t);
-    }
-
-    const noise = ctx.createBufferSource();
-    noise.buffer = buffer;
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+    gain.connect(ctx.destination);
 
     const filter = ctx.createBiquadFilter();
     filter.type = "bandpass";
-    filter.frequency.value = 3000;
-    filter.Q.value = 0.5;
+    filter.frequency.value = 2800;
+    filter.Q.value = 0.6;
+    filter.connect(gain);
 
-    noise.connect(filter);
-    filter.connect(gainNode);
-    noise.start();
-    noise.stop(ctx.currentTime + 0.15);
-
-    setTimeout(() => ctx.close(), 300);
+    const src = ctx.createBufferSource();
+    src.buffer = noiseBuffer;
+    src.connect(filter);
+    src.start();
+    src.stop(ctx.currentTime + 0.12);
   } catch (_) {
     // sound not supported
   }
@@ -66,6 +81,7 @@ const CardDeck = ({
   const handleStart = useCallback(
     (clientX: number, clientY: number) => {
       if (isAnimating) return;
+      getAudioCtx();
       setIsDragging(true);
       startX.current = clientX;
       startY.current = clientY;
