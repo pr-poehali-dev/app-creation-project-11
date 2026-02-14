@@ -56,7 +56,7 @@ const buildSwipeWav = (): string => {
 const initSwipeAudio = () => {
   if (!swipeAudio) {
     swipeAudio = new Audio(buildSwipeWav());
-    swipeAudio.volume = 0.5;
+    swipeAudio.volume = 0.15;
   }
 };
 
