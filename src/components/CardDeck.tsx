@@ -66,18 +66,13 @@ const CardDeck = ({
     if (Math.abs(dragX) > SWIPE_THRESHOLD) {
       const direction = dragX > 0 ? 1 : -1;
       setIsAnimating(true);
-      setDragX(direction * 400);
+      setDragX(direction * 500);
 
       setTimeout(() => {
         setDragX(0);
-        setCurrentIndex((prev) => {
-          if (direction > 0) {
-            return prev === 0 ? cards.length - 1 : prev - 1;
-          }
-          return (prev + 1) % cards.length;
-        });
+        setCurrentIndex((prev) => (prev + 1) % cards.length);
         setIsAnimating(false);
-      }, 250);
+      }, 280);
     } else {
       setDragX(0);
     }
@@ -85,32 +80,39 @@ const CardDeck = ({
     isHorizontal.current = null;
   }, [isDragging, dragX, cards.length]);
 
-  const rotation = dragX * 0.05;
+  const rotation = dragX * 0.04;
   const currentCard = cards[currentIndex];
-
-  const swipeProgress = Math.min(Math.abs(dragX) / 400, 1);
-  const nextScale = 0.92 + swipeProgress * 0.08;
-  const nextTranslateY = 16 - swipeProgress * 16;
-  const thirdScale = 0.86 + swipeProgress * 0.04;
-  const thirdTranslateY = 28 - swipeProgress * 12;
-
   const nextIdx = (currentIndex + 1) % cards.length;
   const thirdIdx = (currentIndex + 2) % cards.length;
   const nextCard = cards[nextIdx];
   const thirdCard = cards[thirdIdx];
 
+  const swipeProgress = Math.min(Math.abs(dragX) / 300, 1);
+
+  const nextScale = 0.94 + swipeProgress * 0.06;
+  const nextTranslateY = 14 - swipeProgress * 14;
+  const nextRotate = -2 + swipeProgress * 2;
+  const nextOpacity = 0.88 + swipeProgress * 0.12;
+
+  const thirdScale = 0.88 + swipeProgress * 0.06;
+  const thirdTranslateY = 26 - swipeProgress * 12;
+  const thirdRotate = 3 - swipeProgress * 1;
+  const thirdOpacity = 0.7 + swipeProgress * 0.18;
+
+  const smoothTransition = isDragging ? "none" : "transform 280ms ease-out, opacity 280ms ease-out";
+
   return (
     <div className="relative flex items-center justify-center w-full" style={{ height: 580 }}>
       <div
-        key={thirdCard.id + "-bg-2"}
-        className="absolute rounded-[28px] w-[350px] overflow-hidden"
+        key={"slot-2-" + thirdCard.id}
+        className="absolute rounded-[28px] w-[350px] overflow-hidden pointer-events-none"
         style={{
           height: 540,
-          transform: `scale(${thirdScale}) translateY(${thirdTranslateY}px) rotate(3deg)`,
+          transform: `scale(${thirdScale}) translateY(${thirdTranslateY}px) rotate(${thirdRotate}deg)`,
           zIndex: 8,
-          opacity: 0.7,
+          opacity: thirdOpacity,
           boxShadow: "0 4px 12px rgba(0,0,0,0.04)",
-          transition: isDragging ? "none" : "transform 250ms ease-out, opacity 250ms ease-out",
+          transition: smoothTransition,
         }}
       >
         <PerceptionCard
@@ -123,15 +125,15 @@ const CardDeck = ({
       </div>
 
       <div
-        key={nextCard.id + "-bg-1"}
-        className="absolute rounded-[28px] w-[350px] overflow-hidden"
+        key={"slot-1-" + nextCard.id}
+        className="absolute rounded-[28px] w-[350px] overflow-hidden pointer-events-none"
         style={{
           height: 540,
-          transform: `scale(${nextScale}) translateY(${nextTranslateY}px) rotate(-1.5deg)`,
+          transform: `scale(${nextScale}) translateY(${nextTranslateY}px) rotate(${nextRotate}deg)`,
           zIndex: 9,
-          opacity: 0.85 + swipeProgress * 0.15,
-          boxShadow: "0 6px 16px rgba(0,0,0,0.06)",
-          transition: isDragging ? "none" : "transform 250ms ease-out, opacity 250ms ease-out",
+          opacity: nextOpacity,
+          boxShadow: "0 8px 20px rgba(0,0,0,0.06)",
+          transition: smoothTransition,
         }}
       >
         <PerceptionCard
@@ -147,7 +149,7 @@ const CardDeck = ({
         className="relative z-20 touch-pan-y"
         style={{
           transform: `translateX(${dragX}px) rotate(${rotation}deg)`,
-          transition: isDragging ? "none" : "transform 250ms ease-out",
+          transition: isDragging ? "none" : "transform 280ms ease-out",
           cursor: "grab",
         }}
         onTouchStart={(e) => handleStart(e.touches[0].clientX, e.touches[0].clientY)}
