@@ -42,14 +42,13 @@ const buildSwipeWav = (): string => {
   let prev = 0;
   for (let i = 0; i < numSamples; i++) {
     const t = i / numSamples;
-    const attack = Math.min(t / 0.02, 1);
-    const release = Math.pow(1 - t, 1.5);
+    const attack = Math.min(t / 0.06, 1);
+    const release = Math.pow(1 - t, 2.5);
     const envelope = attack * release;
-    const burst = t < 0.05 ? (1 - t / 0.05) * 0.4 : 0;
     const raw = Math.random() * 2 - 1;
-    const filtered = prev * 0.7 + raw * 0.3;
+    const filtered = prev * 0.82 + raw * 0.18;
     prev = filtered;
-    const noise = filtered * envelope * 0.2 + raw * burst * envelope;
+    const noise = filtered * envelope * 0.12;
     const sample = Math.max(-1, Math.min(1, noise));
     view.setInt16(44 + i * 2, sample * 32767, true);
   }
@@ -63,7 +62,7 @@ const buildSwipeWav = (): string => {
 const initSwipeAudio = () => {
   if (!swipeAudio) {
     swipeAudio = new Audio(buildSwipeWav());
-    swipeAudio.volume = 0.25;
+    swipeAudio.volume = 0.12;
   }
 };
 
