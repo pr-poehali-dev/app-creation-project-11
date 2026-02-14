@@ -12,7 +12,11 @@ interface CardDeckProps {
 
 const SWIPE_THRESHOLD = 80;
 
-let swipeAudio: HTMLAudioElement | null = null;
+const swipeState = {
+  pool: [] as HTMLAudioElement[],
+  idx: 0,
+  dataUrl: null as string | null,
+};
 
 const buildSwipeWav = (): string => {
   const sampleRate = 44100;
@@ -59,18 +63,26 @@ const buildSwipeWav = (): string => {
   return "data:audio/wav;base64," + btoa(binary);
 };
 
+const POOL_SIZE = 4;
+
 const initSwipeAudio = () => {
-  if (!swipeAudio) {
-    swipeAudio = new Audio(buildSwipeWav());
-    swipeAudio.volume = 0.07;
+  if (swipeState.pool.length > 0) return;
+  swipeState.dataUrl = buildSwipeWav();
+  for (let i = 0; i < POOL_SIZE; i++) {
+    const a = new Audio(swipeState.dataUrl);
+    a.volume = 0.07;
+    a.preload = "auto";
+    swipeState.pool.push(a);
   }
 };
 
 const playSwipeSound = () => {
   try {
-    if (!swipeAudio) return;
-    swipeAudio.currentTime = 0;
-    swipeAudio.play();
+    if (swipeState.pool.length === 0) return;
+    const audio = swipeState.pool[swipeState.idx % POOL_SIZE];
+    swipeState.idx++;
+    audio.currentTime = 0;
+    audio.play();
   } catch (_) {
     // sound not supported
   }
