@@ -15,8 +15,8 @@ const SWIPE_THRESHOLD = 80;
 let swipeAudio: HTMLAudioElement | null = null;
 
 const buildSwipeWav = (): string => {
-  const sampleRate = 22050;
-  const duration = 0.1;
+  const sampleRate = 44100;
+  const duration = 0.22;
   const numSamples = Math.floor(sampleRate * duration);
   const dataSize = numSamples * 2;
   const buffer = new ArrayBuffer(44 + dataSize);
@@ -39,10 +39,17 @@ const buildSwipeWav = (): string => {
   writeStr(36, "data");
   view.setUint32(40, dataSize, true);
 
+  let prev = 0;
   for (let i = 0; i < numSamples; i++) {
     const t = i / numSamples;
-    const envelope = (1 - t) * (1 - t);
-    const noise = (Math.random() * 2 - 1) * envelope * 0.3;
+    const attack = Math.min(t / 0.02, 1);
+    const release = Math.pow(1 - t, 1.5);
+    const envelope = attack * release;
+    const burst = t < 0.05 ? (1 - t / 0.05) * 0.4 : 0;
+    const raw = Math.random() * 2 - 1;
+    const filtered = prev * 0.7 + raw * 0.3;
+    prev = filtered;
+    const noise = filtered * envelope * 0.2 + raw * burst * envelope;
     const sample = Math.max(-1, Math.min(1, noise));
     view.setInt16(44 + i * 2, sample * 32767, true);
   }
@@ -56,7 +63,7 @@ const buildSwipeWav = (): string => {
 const initSwipeAudio = () => {
   if (!swipeAudio) {
     swipeAudio = new Audio(buildSwipeWav());
-    swipeAudio.volume = 0.15;
+    swipeAudio.volume = 0.25;
   }
 };
 
