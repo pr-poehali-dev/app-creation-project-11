@@ -12,6 +12,41 @@ interface CardDeckProps {
 
 const SWIPE_THRESHOLD = 80;
 
+const playSwipeSound = () => {
+  try {
+    const ctx = new (window.AudioContext || (window as never)["webkitAudioContext"])();
+    const gainNode = ctx.createGain();
+    gainNode.gain.setValueAtTime(0.12, ctx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+    gainNode.connect(ctx.destination);
+
+    const bufferSize = ctx.sampleRate * 0.15;
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      const t = i / bufferSize;
+      data[i] = (Math.random() * 2 - 1) * (1 - t) * (1 - t);
+    }
+
+    const noise = ctx.createBufferSource();
+    noise.buffer = buffer;
+
+    const filter = ctx.createBiquadFilter();
+    filter.type = "bandpass";
+    filter.frequency.value = 3000;
+    filter.Q.value = 0.5;
+
+    noise.connect(filter);
+    filter.connect(gainNode);
+    noise.start();
+    noise.stop(ctx.currentTime + 0.15);
+
+    setTimeout(() => ctx.close(), 300);
+  } catch (_) {
+    // sound not supported
+  }
+};
+
 const CardDeck = ({
   cards,
   confirmations,
@@ -66,6 +101,7 @@ const CardDeck = ({
 
     if (Math.abs(dragX) > SWIPE_THRESHOLD) {
       const direction = dragX > 0 ? 1 : -1;
+      playSwipeSound();
       setIsAnimating(true);
       setDragX(direction * 500);
 
