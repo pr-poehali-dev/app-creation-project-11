@@ -12,51 +12,59 @@ interface CardDeckProps {
 
 const SWIPE_THRESHOLD = 80;
 
-let audioCtx: AudioContext | null = null;
-let noiseBuffer: AudioBuffer | null = null;
+let swipeAudio: HTMLAudioElement | null = null;
 
-const getAudioCtx = (): AudioContext | null => {
-  if (!audioCtx) {
-    const AC = window.AudioContext || (window as never)["webkitAudioContext"];
-    if (!AC) return null;
-    audioCtx = new AC();
+const buildSwipeWav = (): string => {
+  const sampleRate = 22050;
+  const duration = 0.1;
+  const numSamples = Math.floor(sampleRate * duration);
+  const dataSize = numSamples * 2;
+  const buffer = new ArrayBuffer(44 + dataSize);
+  const view = new DataView(buffer);
+
+  const writeStr = (offset: number, str: string) => {
+    for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
+  };
+  writeStr(0, "RIFF");
+  view.setUint32(4, 36 + dataSize, true);
+  writeStr(8, "WAVE");
+  writeStr(12, "fmt ");
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);
+  view.setUint16(22, 1, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * 2, true);
+  view.setUint16(32, 2, true);
+  view.setUint16(34, 16, true);
+  writeStr(36, "data");
+  view.setUint32(40, dataSize, true);
+
+  for (let i = 0; i < numSamples; i++) {
+    const t = i / numSamples;
+    const envelope = (1 - t) * (1 - t);
+    const noise = (Math.random() * 2 - 1) * envelope * 0.3;
+    const sample = Math.max(-1, Math.min(1, noise));
+    view.setInt16(44 + i * 2, sample * 32767, true);
   }
-  if (audioCtx.state === "suspended") {
-    audioCtx.resume();
+
+  const bytes = new Uint8Array(buffer);
+  let binary = "";
+  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+  return "data:audio/wav;base64," + btoa(binary);
+};
+
+const initSwipeAudio = () => {
+  if (!swipeAudio) {
+    swipeAudio = new Audio(buildSwipeWav());
+    swipeAudio.volume = 0.5;
   }
-  if (!noiseBuffer && audioCtx) {
-    const size = audioCtx.sampleRate * 0.12;
-    noiseBuffer = audioCtx.createBuffer(1, size, audioCtx.sampleRate);
-    const data = noiseBuffer.getChannelData(0);
-    for (let i = 0; i < size; i++) {
-      const t = i / size;
-      data[i] = (Math.random() * 2 - 1) * (1 - t * t);
-    }
-  }
-  return audioCtx;
 };
 
 const playSwipeSound = () => {
   try {
-    const ctx = getAudioCtx();
-    if (!ctx || !noiseBuffer) return;
-
-    const gain = ctx.createGain();
-    gain.gain.setValueAtTime(0.15, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
-    gain.connect(ctx.destination);
-
-    const filter = ctx.createBiquadFilter();
-    filter.type = "bandpass";
-    filter.frequency.value = 2800;
-    filter.Q.value = 0.6;
-    filter.connect(gain);
-
-    const src = ctx.createBufferSource();
-    src.buffer = noiseBuffer;
-    src.connect(filter);
-    src.start();
-    src.stop(ctx.currentTime + 0.12);
+    if (!swipeAudio) return;
+    swipeAudio.currentTime = 0;
+    swipeAudio.play();
   } catch (_) {
     // sound not supported
   }
@@ -81,7 +89,7 @@ const CardDeck = ({
   const handleStart = useCallback(
     (clientX: number, clientY: number) => {
       if (isAnimating) return;
-      getAudioCtx();
+      initSwipeAudio();
       setIsDragging(true);
       startX.current = clientX;
       startY.current = clientY;
