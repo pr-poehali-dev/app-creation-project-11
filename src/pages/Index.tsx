@@ -54,40 +54,11 @@ const Index = () => {
           Если тревожно — начните листать
         </p>
 
-        <div className="relative animate-breathe mb-16">
-          {[...cardsData].reverse().map((card, i) => {
-            const offset = cardsData.length - 1 - i;
-            const scale = 1 - offset * 0.04;
-            const translateY = offset * 10;
-            const rotate = offset * (offset % 2 === 0 ? 3 : -3);
-
-            return (
-              <div
-                key={card.id}
-                className="rounded-[28px] flex flex-col items-center justify-end overflow-hidden"
-                style={{
-                  backgroundColor: "#f0d6f6",
-                  width: 320,
-                  height: 440,
-                  position: offset === 0 ? "relative" : "absolute",
-                  top: 0,
-                  left: 0,
-                  transform: `scale(${scale}) translateY(${translateY}px) rotate(${rotate}deg)`,
-                  zIndex: cardsData.length - offset,
-                  boxShadow: "0 12px 30px rgba(0,0,0,0.08)",
-                }}
-              >
-                {offset === 0 && (
-                  <img
-                    src="https://storage.yandexcloud.net/sitevek/IMG_3898.gif"
-                    alt="Мишка"
-                    className="w-20 h-20 object-contain mb-6"
-                  />
-                )}
-              </div>
-            );
-          })}
-        </div>
+        <img
+          src="https://storage.yandexcloud.net/sitevek/IMG_3898.gif"
+          alt="Мишка"
+          className="w-24 h-24 object-contain mb-16 animate-breathe"
+        />
 
         <button
           onClick={() => setStarted(true)}
