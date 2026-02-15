@@ -40,7 +40,12 @@ const Index = () => {
     return (
       <div
         className="min-h-screen flex flex-col items-center justify-center px-6 safe-area-top safe-area-bottom"
-        style={{ backgroundColor: "hsl(var(--background))" }}
+        style={{
+          backgroundImage: "url('https://cdn.poehali.dev/projects/928c85d8-ba39-48f6-8cdd-213f541edee5/bucket/8c495ea8-7382-4fcb-abe8-34c7a2bb6db5.jpeg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
       >
         <p
           className="text-lg font-medium text-center mb-12 animate-fade-in-up"
