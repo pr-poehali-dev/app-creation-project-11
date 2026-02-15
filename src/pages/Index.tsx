@@ -59,11 +59,11 @@ const Index = () => {
             return (
               <div
                 key={card.id}
-                className="rounded-[28px]"
+                className="rounded-[28px] flex flex-col items-center justify-end overflow-hidden"
                 style={{
-                  backgroundColor: card.color,
-                  width: 280,
-                  height: 380,
+                  backgroundColor: "#f0d6f6",
+                  width: 320,
+                  height: 440,
                   position: offset === 0 ? "relative" : "absolute",
                   top: 0,
                   left: 0,
@@ -71,7 +71,15 @@ const Index = () => {
                   zIndex: cardsData.length - offset,
                   boxShadow: "0 12px 30px rgba(0,0,0,0.08)",
                 }}
-              />
+              >
+                {offset === 0 && (
+                  <img
+                    src="https://storage.yandexcloud.net/sitevek/IMG_3898.gif"
+                    alt="Мишка"
+                    className="w-20 h-20 object-contain mb-6"
+                  />
+                )}
+              </div>
             );
           })}
         </div>
